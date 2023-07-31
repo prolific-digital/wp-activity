@@ -1,49 +1,53 @@
-# WP Activity
+# WP Activity Tracker
 
-WP Activity is a WordPress plugin that tracks all activity that happens on your WordPress site and displays a log with user-centric details. It provides valuable insights into user actions, post changes, media handling, user updates, and plugin events, helping you stay informed about the activities on your website.
+The WP Activity Tracker is a powerful plugin developed by [Prolific Digital](http://prolificdigital.com) that tracks all activity that happens within your WordPress site and displays a comprehensive log with user-centric details. This handy tool helps you keep track of important changes, updates, and user actions on your site.
 
 ## Features
 
-- Track and log various activities happening on your WordPress site.
-- View an activity log with detailed information about user actions.
-- Monitor post changes, media additions, deletions, and updates.
-- Keep track of user registrations, updates, and deletions.
-- Get notified about plugin installations, activations, deactivations, and deletions.
+- Tracks various activities in WordPress, including post changes, media additions/deletions, user registrations, updates, and deletions.
+- Provides a log with essential details, such as the activity description, user involved, and the date it occurred.
+- Integrates seamlessly with your WordPress admin interface for easy management.
 
-## Getting Started
+## Installation
 
-### Installation
+To install the WP Activity Tracker plugin, follow these steps:
 
-1. Download the plugin ZIP file from [GitHub](https://github.com/prolific-digital/wp-activity/releases).
-2. In your WordPress admin dashboard, navigate to "Plugins" > "Add New."
-3. Click on the "Upload Plugin" button, choose the ZIP file you downloaded, and click "Install Now."
-4. Once the plugin is installed, click "Activate" to enable it.
+1. Download the plugin from the [GitHub repository](https://github.com/prolific-digital/wp-activity).
+2. Upload the plugin folder to your WordPress plugin directory (`wp-content/plugins/`).
+3. Activate the plugin through the 'Plugins' menu in your WordPress admin.
 
-### Usage
+> Please note that this plugin requires WordPress version 5.0 or higher and PHP 7.0 or higher.
 
-WP Activity automatically starts tracking activities once it's activated. You can view the activity log from the WordPress admin dashboard under "Activity."
+## How to Use
 
-#### Activity Log
+After installing and activating the plugin, the WP Activity Tracker will automatically start recording various activities on your WordPress site. You can view the activity log from the 'Activity' menu in your WordPress admin panel.
 
-The activity log displays a list of all recorded activities in reverse chronological order, showing the latest activity first. Each log entry includes the following details:
+### Supported Activities
 
-- **Activity**: A brief description of the activity that occurred.
-- **User**: The username of the user associated with the activity.
-- **Date**: The date and time when the activity took place.
-- **ID**: The ID of the related post, media, or user (if applicable).
+- **Post Changes**: Any updates, publishing, or trashing of posts will be logged.
+- **Page Changes**: Any updates, publishing, or trashing of posts will be logged.
+- **Custom Post Type Changes**: Any updates, publishing, or trashing of posts will be logged.
+- **Media Additions/Deletions**: When media files are added or deleted, the plugin will record these actions.
+- **User Registrations**: Whenever a new user registers on your site, it will be logged.
+- **User Updates/Deletions**: Changes to user profiles or deletions of user accounts will be tracked.
+- **Plugin Activation/Deactivation**: Whenever a plugin is activated or deactivated, the WP Activity Tracker will keep you informed.
 
-#### Activity Details
+## Support and Contributing
 
-To see more detailed information about a specific activity, click on the activity's title in the activity log. This will take you to the "Activity Details" page, where you can find additional information about the activity.
+For support or to report any issues, please [submit an issue](https://github.com/prolific-digital/wp-activity/issues) on our GitHub repository. We welcome contributions from the community to further improve this plugin. If you have any feature additions or bug fixes, feel free to send us a pull request with a brief description of your changes.
 
-## Support
-
-If you need any assistance or have questions about using WP Activity, you can reach out to our support team at [support@prolificdigital.com](mailto:support@prolificdigital.com).
+> Before submitting a pull request for a new feature, we encourage you to discuss it with us first to ensure it aligns with our project's direction and goals.
 
 ## License
 
-WP Activity is released under the [GNU General Public License](https://www.gnu.org/licenses/gpl-2.0.html) version 2 or later.
+This project is licensed under the GPL-3.0 License. For more information, please see the [LICENSE file](LICENSE).
+
+## Versioning
+
+We follow Semantic Versioning for versioning this plugin. You can find the available versions and releases on the [GitHub repository](https://github.com/prolific-digital/wp-activity/releases).
+
+Start tracking your WordPress activities with the WP Activity Tracker plugin and stay informed about your site's changes!
 
 ---
 
-Thank you for choosing WP Activity! We hope this plugin enhances your WordPress experience and helps you keep track of essential site activities.
+_Proudly crafted by Prolific Digital_

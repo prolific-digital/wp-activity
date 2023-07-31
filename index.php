@@ -3,10 +3,16 @@
 /**
  * Plugin Name: WP Activity
  * Description: Tracks all activity that happens in WordPress and displays a log with user-centric details.
- * Version: 0.1.0
+ * Version: 1.0.0
  * Author: Prolific Digital
  * Author URI: http://prolificdigital.com
+ * Plugin URI: http://prolificdigital.com
+ * License: GPL3
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: wp-activity
+ * Domain Path: /languages
+ * Requires at least: 5.0
+ * Requires PHP: 7.0
  */
 
 class WP_Activity_Tracker {
@@ -30,43 +36,24 @@ class WP_Activity_Tracker {
     add_action('delete_attachment', array($this, 'track_media_deleted')); // Add this line
     add_filter('manage_activity_posts_columns', array($this, 'add_activity_columns'));
     add_action('manage_activity_posts_custom_column', array($this, 'manage_activity_columns'), 10, 2);
-    add_action('upgrader_process_complete', array($this, 'track_plugin_installation'), 10, 2);
     add_action('activated_plugin', array($this, 'track_plugin_activation'));
     add_action('deactivated_plugin', array($this, 'track_plugin_deactivation'));
-    add_action('uninstall_plugin', array($this, 'track_plugin_deletion'), 10, 2);
-  }
-
-  // Track plugin installation
-  public function track_plugin_installation($plugin) {
-    $current_user = wp_get_current_user();
-    $plugin_name = $this->get_plugin_basename($plugin);
-    $this->log_activity("Plugin '{$plugin_name}' was installed", $current_user->ID);
   }
 
   // Track plugin activation
   public function track_plugin_activation($plugin) {
     $current_user = wp_get_current_user();
-    $plugin_name = $this->get_plugin_basename($plugin);
+    $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin);
+    $plugin_name = $plugin_data['Name'];
     $this->log_activity("Plugin '{$plugin_name}' was activated", $current_user->ID);
   }
 
   // Track plugin deactivation
   public function track_plugin_deactivation($plugin) {
     $current_user = wp_get_current_user();
-    $plugin_name = $this->get_plugin_basename($plugin);
+    $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin);
+    $plugin_name = $plugin_data['Name'];
     $this->log_activity("Plugin '{$plugin_name}' was deactivated", $current_user->ID);
-  }
-
-  // Track plugin deletion
-  public function track_plugin_deletion($plugin) {
-    $current_user = wp_get_current_user();
-    $plugin_name = $this->get_plugin_basename($plugin);
-    $this->log_activity("Plugin '{$plugin_name}' was deleted", $current_user->ID);
-  }
-
-  // Helper function to get the plugin's basename from the full path
-  private function get_plugin_basename($plugin) {
-    return plugin_basename($plugin);
   }
 
   // Add new columns to the activity post type
@@ -87,13 +74,17 @@ class WP_Activity_Tracker {
   public function manage_activity_columns($column, $post_id) {
     switch ($column) {
       case 'id':
-        $post = get_post($post_id);
-        echo '<a href="' . get_edit_post_link($post_id) . '">' . $post_id . '</a>';
+        $tracked_item_id = get_post_meta($post_id, '_modified_post_id', true);
+        if ($tracked_item_id) {
+          echo '<a href="' . get_edit_post_link($tracked_item_id) . '">' . $tracked_item_id . '</a>';
+        } else {
+          echo 'N/A';
+        }
         break;
       case 'user':
         $user_id = get_post_meta($post_id, '_activity_user_id', true);
         $user_info = get_userdata($user_id);
-        echo $user_info->user_login;
+        echo $user_info ? $user_info->user_login : 'N/A';
         break;
         // Handle other custom columns if needed
     }
@@ -148,7 +139,6 @@ class WP_Activity_Tracker {
     $user_info = get_userdata($user_id);
     $this->log_activity("User {$user_info->user_login} was updated", $user_id, $user_id);  // Pass $user_id as the third argument.
   }
-
 
   private function log_activity($message, $user_id, $modified_post_id = 0) {
     $activity_args = array(
@@ -263,6 +253,7 @@ class WP_Activity_Tracker {
         'create_posts' => 'do_not_allow', // Removes support for the "Add New" function (Note: 'do_not_allow' is a special flag)
       ),
       'map_meta_cap' => true, // Set to `true` to map custom "capabilities" to built-in WordPress capabilities
+      'menu_icon' => 'dashicons-clock', // Use the clock dashicon
     );
     register_post_type('activity', $args);
   }
@@ -316,13 +307,12 @@ class WP_Activity_Tracker {
       // Log when a post is updated.
       $activity_args['post_title'] = $post->post_title . ' was updated';
     } else {
-      return;
+      // For all other status changes, log the status transition.
+      $activity_args['post_title'] = "{$post->post_title} status changed from {$old_status} to {$new_status}";
     }
 
     $this->log_activity($activity_args['post_title'], $current_user->ID, $post->ID);
   }
-
-
 
   public function remove_publish_box() {
     remove_meta_box('submitdiv', 'activity', 'side');

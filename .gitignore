@@ -1,0 +1,42 @@
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Node.js dependencies
+/node_modules/
+
+# Ignore build and compiled files
+/dist/
+/build/
+
+# Ignore environment-specific configurations
+/.env
+/.env.*
+
+# Ignore logs
+*.log
+log.txt
+
+# Ignore database backup files
+*.sql
+*.sql.gz
+
+# Ignore miscellaneous files
+Thumbs.db
+*.bak
+*.zip
+*.rar
+*.tar.gz
+
+# Ignore debugging tools
+/phpdbg/
+Xdebug.*
+
+# Ignore IDE specific files
+/.vscode/
+.idea/
+*.code-workspace
+
+# Ignore package lock files
+package-lock.json
+yarn.lock
