@@ -1,19 +1,45 @@
 <?php
+/**
+ * Plugin Name:       WP Activity
+ * Plugin URI:        https://prolificdigital.com
+ * Description:       Tracks activity in WordPress and displays a log with user-centric details.
+ * Version:           1.1.0
+ * Requires at least: 6.5
+ * Requires PHP:      8.4
+ * Author:            Prolific Digital
+ * Author URI:        https://prolificdigital.com
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       wp-activity
+ * Domain Path:       /languages
+ * Update URI:        https://api.prolificdigital.io/api/update?plugin=wp-activity
+ *
+ * @package WPActivity
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+define( 'WP_ACTIVITY_VERSION', '1.1.0' );
+define( 'WP_ACTIVITY_PLUGIN_FILE', __FILE__ );
+define( 'WP_ACTIVITY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
+// Composer dependencies (plugin-update-checker). Present in release zips;
+// in a git checkout run `composer install` first.
+if ( is_readable( WP_ACTIVITY_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+	require_once WP_ACTIVITY_PLUGIN_DIR . 'vendor/autoload.php';
+}
+
+require_once WP_ACTIVITY_PLUGIN_DIR . 'includes/update-checker.php';
 
 /**
- * Plugin Name: WP Activity
- * Description: Tracks all activity that happens in WordPress and displays a log with user-centric details.
- * Version: 1.0.0
- * Author: Prolific Digital
- * Author URI: http://prolificdigital.com
- * Plugin URI: http://prolificdigital.com
- * License: GPL3
- * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-activity
- * Domain Path: /languages
- * Requires at least: 5.0
- * Requires PHP: 7.0
+ * Load bundled translations from /languages (the header's Domain Path).
  */
+add_action(
+	'init',
+	static function () {
+		load_plugin_textdomain( 'wp-activity', false, dirname( plugin_basename( WP_ACTIVITY_PLUGIN_FILE ) ) . '/languages' );
+	}
+);
 
 class WP_Activity_Tracker {
   public function __construct() {
@@ -76,15 +102,20 @@ class WP_Activity_Tracker {
       case 'id':
         $tracked_item_id = get_post_meta($post_id, '_modified_post_id', true);
         if ($tracked_item_id) {
-          echo '<a href="' . get_edit_post_link($tracked_item_id) . '">' . $tracked_item_id . '</a>';
+          $edit_link = get_edit_post_link((int) $tracked_item_id);
+          if ($edit_link) {
+            echo '<a href="' . esc_url($edit_link) . '">' . esc_html($tracked_item_id) . '</a>';
+          } else {
+            echo esc_html($tracked_item_id);
+          }
         } else {
-          echo 'N/A';
+          echo esc_html__('N/A', 'wp-activity');
         }
         break;
       case 'user':
         $user_id = get_post_meta($post_id, '_activity_user_id', true);
         $user_info = get_userdata($user_id);
-        echo $user_info ? $user_info->user_login : 'N/A';
+        echo $user_info ? esc_html($user_info->user_login) : esc_html__('N/A', 'wp-activity');
         break;
         // Handle other custom columns if needed
     }
@@ -157,10 +188,11 @@ class WP_Activity_Tracker {
     $user_id = get_post_meta($post->ID, '_activity_user_id', true);
     $user_info = get_userdata($user_id);
     $modified_post_id = get_post_meta($post->ID, '_modified_post_id', true);
-    echo "<div><strong>Activity:</strong> {$post->post_title}</div>";
-    echo "<div><strong>User:</strong> {$user_info->user_login}</div>";
-    echo "<div><strong>Date:</strong> {$post->post_date}</div>";
-    echo "<div><strong>ID:</strong> {$modified_post_id}</div>";
+    $user_login = $user_info ? $user_info->user_login : __('N/A', 'wp-activity');
+    echo '<div><strong>Activity:</strong> ' . esc_html($post->post_title) . '</div>';
+    echo '<div><strong>User:</strong> ' . esc_html($user_login) . '</div>';
+    echo '<div><strong>Date:</strong> ' . esc_html($post->post_date) . '</div>';
+    echo '<div><strong>ID:</strong> ' . esc_html($modified_post_id) . '</div>';
   }
 
   public function add_activity_detail_box() {
@@ -203,13 +235,22 @@ class WP_Activity_Tracker {
   }
 
   public function track_bulk_actions() {
-    if (!isset($_REQUEST['action']) || $_REQUEST['action'] != 'trash' || $_REQUEST['post_type'] == 'activity') {
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended -- verified below with check_admin_referer().
+    $action    = isset($_REQUEST['action']) ? sanitize_key(wp_unslash($_REQUEST['action'])) : '';
+    $post_type = isset($_REQUEST['post_type']) ? sanitize_key(wp_unslash($_REQUEST['post_type'])) : 'post';
+    if ('trash' !== $action || 'activity' === $post_type || empty($_REQUEST['post'])) {
       return;
     }
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-    $post_ids = array_map('intval', (array) $_REQUEST['post']);
+    // Same nonce core's edit.php checks for bulk actions; stops forged log entries.
+    check_admin_referer('bulk-posts');
+
+    $post_ids = array_map('absint', (array) wp_unslash($_REQUEST['post']));
     foreach ($post_ids as $post_id) {
-      $this->log_delete($post_id);
+      if ($post_id && current_user_can('delete_post', $post_id)) {
+        $this->log_delete($post_id);
+      }
     }
   }
 
@@ -233,7 +274,8 @@ class WP_Activity_Tracker {
   public function display_activity_user($post) {
     $user_id = get_post_meta($post->ID, '_activity_user_id', true);
     $user_info = get_userdata($user_id);
-    echo "<div>User: {$user_info->user_login}</div>";
+    $user_login = $user_info ? $user_info->user_login : __('N/A', 'wp-activity');
+    echo '<div>User: ' . esc_html($user_login) . '</div>';
   }
 
   public function register_activity_post_type() {
