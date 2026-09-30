@@ -1,20 +1,25 @@
 <?php
-
 /**
- * Plugin Name: WP Activity
- * Description: Tracks all activity that happens in WordPress and displays a log with user-centric details.
- * Version: 1.0.0
- * Author: Prolific Digital
- * Author URI: http://prolificdigital.com
- * Plugin URI: http://prolificdigital.com
- * License: GPL3
- * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: wp-activity
- * Domain Path: /languages
- * Requires at least: 5.0
- * Requires PHP: 7.0
+ * Plugin Name:       WP Activity
+ * Plugin URI:        https://prolificdigital.com
+ * Description:       Tracks activity in WordPress and displays a log with user-centric details.
+ * Version:           1.1.0
+ * Requires at least: 6.5
+ * Requires PHP:      8.4
+ * Author:            Prolific Digital
+ * Author URI:        https://prolificdigital.com
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       wp-activity
+ * Domain Path:       /languages
+ * Update URI:        https://api.prolificdigital.io/api/update?plugin=wp-activity
+ *
+ * @package WPActivity
  */
 
+defined( 'ABSPATH' ) || exit;
+
+define( 'WP_ACTIVITY_VERSION', '1.1.0' );
 define( 'WP_ACTIVITY_PLUGIN_FILE', __FILE__ );
 define( 'WP_ACTIVITY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 
@@ -25,6 +30,16 @@ if ( is_readable( WP_ACTIVITY_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 }
 
 require_once WP_ACTIVITY_PLUGIN_DIR . 'includes/update-checker.php';
+
+/**
+ * Load bundled translations from /languages (the header's Domain Path).
+ */
+add_action(
+	'init',
+	static function () {
+		load_plugin_textdomain( 'wp-activity', false, dirname( plugin_basename( WP_ACTIVITY_PLUGIN_FILE ) ) . '/languages' );
+	}
+);
 
 class WP_Activity_Tracker {
   public function __construct() {
