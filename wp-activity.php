@@ -235,13 +235,22 @@ class WP_Activity_Tracker {
   }
 
   public function track_bulk_actions() {
-    if (!isset($_REQUEST['action']) || $_REQUEST['action'] != 'trash' || $_REQUEST['post_type'] == 'activity') {
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended -- verified below with check_admin_referer().
+    $action    = isset($_REQUEST['action']) ? sanitize_key(wp_unslash($_REQUEST['action'])) : '';
+    $post_type = isset($_REQUEST['post_type']) ? sanitize_key(wp_unslash($_REQUEST['post_type'])) : 'post';
+    if ('trash' !== $action || 'activity' === $post_type || empty($_REQUEST['post'])) {
       return;
     }
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-    $post_ids = array_map('intval', (array) $_REQUEST['post']);
+    // Same nonce core's edit.php checks for bulk actions; stops forged log entries.
+    check_admin_referer('bulk-posts');
+
+    $post_ids = array_map('absint', (array) wp_unslash($_REQUEST['post']));
     foreach ($post_ids as $post_id) {
-      $this->log_delete($post_id);
+      if ($post_id && current_user_can('delete_post', $post_id)) {
+        $this->log_delete($post_id);
+      }
     }
   }
 
