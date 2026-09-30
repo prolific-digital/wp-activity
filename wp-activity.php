@@ -15,6 +15,17 @@
  * Requires PHP: 7.0
  */
 
+define( 'WP_ACTIVITY_PLUGIN_FILE', __FILE__ );
+define( 'WP_ACTIVITY_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+
+// Composer dependencies (plugin-update-checker). Present in release zips;
+// in a git checkout run `composer install` first.
+if ( is_readable( WP_ACTIVITY_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+	require_once WP_ACTIVITY_PLUGIN_DIR . 'vendor/autoload.php';
+}
+
+require_once WP_ACTIVITY_PLUGIN_DIR . 'includes/update-checker.php';
+
 class WP_Activity_Tracker {
   public function __construct() {
     add_action('init', array($this, 'register_activity_post_type'));
