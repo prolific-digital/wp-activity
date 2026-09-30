@@ -33,6 +33,7 @@ Entries are stored as posts of the private `activity` post type and cannot be cr
 == Changelog ==
 
 = 1.1.0 =
+* Security: escape activity titles, user names, dates and IDs in the activity log (stored XSS).
 * Updates now come from the Prolific Digital license server. Define `PROLIFIC_LICENSE_KEY_WP_ACTIVITY` to receive them.
 * Main file renamed to `wp-activity.php`; reactivate the plugin once after updating.
 * License changed from GPL-3.0 to GPL-2.0-or-later.

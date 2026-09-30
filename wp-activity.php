@@ -102,15 +102,20 @@ class WP_Activity_Tracker {
       case 'id':
         $tracked_item_id = get_post_meta($post_id, '_modified_post_id', true);
         if ($tracked_item_id) {
-          echo '<a href="' . get_edit_post_link($tracked_item_id) . '">' . $tracked_item_id . '</a>';
+          $edit_link = get_edit_post_link((int) $tracked_item_id);
+          if ($edit_link) {
+            echo '<a href="' . esc_url($edit_link) . '">' . esc_html($tracked_item_id) . '</a>';
+          } else {
+            echo esc_html($tracked_item_id);
+          }
         } else {
-          echo 'N/A';
+          echo esc_html__('N/A', 'wp-activity');
         }
         break;
       case 'user':
         $user_id = get_post_meta($post_id, '_activity_user_id', true);
         $user_info = get_userdata($user_id);
-        echo $user_info ? $user_info->user_login : 'N/A';
+        echo $user_info ? esc_html($user_info->user_login) : esc_html__('N/A', 'wp-activity');
         break;
         // Handle other custom columns if needed
     }
@@ -183,10 +188,11 @@ class WP_Activity_Tracker {
     $user_id = get_post_meta($post->ID, '_activity_user_id', true);
     $user_info = get_userdata($user_id);
     $modified_post_id = get_post_meta($post->ID, '_modified_post_id', true);
-    echo "<div><strong>Activity:</strong> {$post->post_title}</div>";
-    echo "<div><strong>User:</strong> {$user_info->user_login}</div>";
-    echo "<div><strong>Date:</strong> {$post->post_date}</div>";
-    echo "<div><strong>ID:</strong> {$modified_post_id}</div>";
+    $user_login = $user_info ? $user_info->user_login : __('N/A', 'wp-activity');
+    echo '<div><strong>Activity:</strong> ' . esc_html($post->post_title) . '</div>';
+    echo '<div><strong>User:</strong> ' . esc_html($user_login) . '</div>';
+    echo '<div><strong>Date:</strong> ' . esc_html($post->post_date) . '</div>';
+    echo '<div><strong>ID:</strong> ' . esc_html($modified_post_id) . '</div>';
   }
 
   public function add_activity_detail_box() {
@@ -259,7 +265,8 @@ class WP_Activity_Tracker {
   public function display_activity_user($post) {
     $user_id = get_post_meta($post->ID, '_activity_user_id', true);
     $user_info = get_userdata($user_id);
-    echo "<div>User: {$user_info->user_login}</div>";
+    $user_login = $user_info ? $user_info->user_login : __('N/A', 'wp-activity');
+    echo '<div>User: ' . esc_html($user_login) . '</div>';
   }
 
   public function register_activity_post_type() {
